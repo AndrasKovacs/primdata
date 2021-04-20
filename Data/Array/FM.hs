@@ -47,6 +47,34 @@ modify (Array arr) (I# i) f = IO \s -> case readByteArray# arr i s of
     s -> (# s, () #)
 {-# inline modify #-}
 
+map' :: forall a. Flat a => (a -> a) -> Array a -> IO ()
+map' f (Array arr) = IO \s ->
+  let go arr i n s = case i ==# n of
+        1# -> (# s, () #)
+        _  -> case readByteArray# arr i s of
+          (# s, a #) -> case a of
+            !a -> case f a of
+              !a -> case writeByteArray# arr i a s of
+                 s -> go arr (i +# 1#) n s
+  in go arr 0# (quotInt# (sizeofMutableByteArray# arr) (size# @a proxy#)) s
+{-# inline map' #-}
+
+for :: forall a. Flat a => Array a -> (a -> IO ()) -> IO ()
+for (Array arr) f = IO \s ->
+  let go arr i n s = case i ==# n of
+        1# -> (# s, () #)
+        _  -> case readByteArray# arr i s of
+          (# s, a #) -> case a of
+            !a -> case f a of
+              IO f -> case f s of
+                (# s, _ #) -> go arr (i +# 1#) n s
+  in go arr 0# (quotInt# (sizeofMutableByteArray# arr) (size# @a proxy#)) s
+{-# inline for #-}
+
+set :: forall a. Flat a => Array a -> a -> IO ()
+set arr a = map' (\_ -> a) arr
+{-# inline set #-}
+
 size :: forall a. Flat a => Array a -> Int
 size (Array arr) = I# (quotInt# (sizeofMutableByteArray# arr) (size# @a proxy#))
 {-# inline size #-}

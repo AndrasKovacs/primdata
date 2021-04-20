@@ -63,6 +63,17 @@ map' f (Array arr) = IO \s ->
   in go arr 0# (sizeofMutableArrayArray# arr) s
 {-# inline map' #-}
 
+for :: forall a. Unlifted a => Array a -> (a -> IO ()) -> IO ()
+for (Array arr) f = IO \s ->
+  let go arr i n s = case i ==# n of
+        1# -> (# s, () #)
+        _  -> case readUnlifted# arr i s of
+          (# s, a #) -> case f (from# a) of
+            IO f -> case f s of
+              (# s, _ #) -> go arr (i +# 1#) n s
+  in go arr 0# (sizeofMutableArrayArray# arr) s
+{-# inline for #-}
+
 set :: forall a. Unlifted a => Array a -> a -> IO ()
 set arr a = map' (\_ -> a) arr
 {-# inline set #-}
