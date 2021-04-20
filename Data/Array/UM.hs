@@ -50,6 +50,23 @@ modify (Array arr) (I# i) f = IO \s -> case readUnlifted# arr i s of
         s -> (# s, () #)
 {-# inline modify #-}
 
+map' :: forall a. Unlifted a => (a -> a) -> Array a -> IO ()
+map' f (Array arr) = IO \s ->
+  let go :: forall s. MutableArrayArray# s -> Int# -> Int# -> State# s -> (# State# s, () #)
+      go arr i n s = case i ==# n of
+        1# -> (# s, () #)
+        _  -> case readUnlifted# arr i s of
+          (# s, a #) -> case from# a of
+            !a -> case f a of
+              !a -> case writeUnlifted# arr i (to# a) s of
+                 s -> go arr (i +# 1#) n s
+  in go arr 0# (sizeofMutableArrayArray# arr) s
+{-# inline map' #-}
+
+set :: forall a. Unlifted a => Array a -> a -> IO ()
+set arr a = map' (\_ -> a) arr
+{-# inline set #-}
+
 size :: Array a -> Int
 size (Array arr) = I# (sizeofMutableArrayArray# arr)
 {-# inline size #-}

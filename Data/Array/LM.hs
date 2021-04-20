@@ -46,6 +46,21 @@ modify (Array arr) (I# i) f = IO \s -> case readArray# arr i s of
     s -> (# s, () #)
 {-# inline modify #-}
 
+map' :: forall a b. (a -> b) -> Array a -> IO ()
+map' f (Array arr) = IO \s ->
+  let go :: forall s. MutableArray# s a -> Int# -> Int# -> State# s -> (# State# s, () #)
+      go arr i n s = case i ==# n of
+        1# -> (# s, () #)
+        _  -> case readArray# arr i s of
+          (# s, a #) -> let !v = unsafeCoerce# (f a) in case writeArray# arr i v s of
+            s -> go arr (i +# 1#) n s
+  in go arr 0# (sizeofMutableArray# arr) s
+{-# inline map' #-}
+
+set :: forall a. Array a -> a -> IO ()
+set arr a = map' (\_ -> a) arr
+{-# inline set #-}
+
 modify' :: forall a.  Array a -> Int -> (a -> a) -> IO ()
 modify' (Array arr) (I# i) f = IO \s -> case readArray# arr i s of
   (# s, a #) -> let !v = f a in case writeArray# arr i v s of
