@@ -3,8 +3,6 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 5b5fca2dce65cf532b06f41e97d022a75b6cbbb2240fbca2a394872b695751d7
 
 name:           primdata
 version:        0.1.0.0
@@ -40,4 +38,5 @@ library
   ghc-options: -Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-matches -Wno-partial-type-signatures -O2 -fllvm
   build-depends:
       base >=4.7 && <5
+    , ghc-prim
   default-language: Haskell2010
