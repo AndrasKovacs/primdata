@@ -1,3 +1,4 @@
+{-# language RankNTypes #-}
 
 module Data.Array.UndefElem where
 

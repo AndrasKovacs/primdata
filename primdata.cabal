@@ -1,16 +1,16 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 246e54507607906d99b048fd642d034544ea532f7bfcb2adacfa1e5c986d5a99
+-- hash: 5b5fca2dce65cf532b06f41e97d022a75b6cbbb2240fbca2a394872b695751d7
 
 name:           primdata
 version:        0.1.0.0
 author:         András Kovács
 maintainer:     puttamalac@gmail.com
-copyright:      2018-2020 András Kovács
+copyright:      2018-2021 András Kovács
 license:        BSD3
 build-type:     Simple
 
@@ -36,10 +36,8 @@ library
   other-modules:
       Paths_primdata
   hs-source-dirs:
-      ./.
-  default-extensions: AllowAmbiguousTypes BangPatterns BlockArguments CPP DataKinds FlexibleInstances GeneralizedNewtypeDeriving KindSignatures MagicHash PolyKinds RankNTypes RoleAnnotations ScopedTypeVariables TypeApplications TypeFamilies UnboxedTuples
+      ./
   ghc-options: -Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-matches -Wno-partial-type-signatures -O2 -fllvm
   build-depends:
       base >=4.7 && <5
-    , ghc-prim
   default-language: Haskell2010

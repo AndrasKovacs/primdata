@@ -1,16 +1,21 @@
+{-# language
+  UnboxedTuples, TypeOperators, MagicHash, RankNTypes,
+  TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
+  RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
 
 module Data.Array.FM where
 
-import GHC.Types
-import GHC.Prim
-import GHC.Magic
+import GHC.Exts
+import Data.Kind
+
 import Data.Flat
+import IO
 
 import qualified Data.Array.FI as FI
 import Data.Unlifted
 
 type role Array representational
-data Array (a :: *) = Array (MutableByteArray# RealWorld)
+data Array (a :: Type) = Array (MutableByteArray# RealWorld)
 
 instance Unlifted (Array a) where
   type Rep (Array a) = MutableByteArray# RealWorld

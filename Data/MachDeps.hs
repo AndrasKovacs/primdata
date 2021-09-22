@@ -1,3 +1,4 @@
+{-# language CPP #-}
 
 module Data.MachDeps where
 

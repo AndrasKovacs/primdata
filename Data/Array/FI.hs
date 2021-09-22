@@ -1,10 +1,11 @@
+{-# language
+  UnboxedTuples, TypeOperators, MagicHash, RankNTypes,
+  TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
+  RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
 
 module Data.Array.FI where
 
-import GHC.Types
-import GHC.Magic
-import GHC.Prim
-
+import GHC.Exts
 import Data.Flat
 import Data.Unlifted
 

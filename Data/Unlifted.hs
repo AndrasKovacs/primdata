@@ -1,3 +1,5 @@
+{-# language UnboxedTuples, TypeOperators, MagicHash, CPP, RankNTypes, TypeApplications,
+             ScopedTypeVariables, AllowAmbiguousTypes, KindSignatures, TypeFamilies #-}
 
 module Data.Unlifted where
 
@@ -10,8 +12,8 @@ module Data.Unlifted where
     different unlifted type!
 -}
 
-import GHC.Prim
-import GHC.Types
+import Data.Kind
+import GHC.Exts
 
 writeUnlifted# ::
    forall (a :: TYPE 'UnliftedRep) s. MutableArrayArray# s -> Int# -> a -> State# s -> State# s
@@ -43,7 +45,7 @@ newUnlifted# i a s = case newArrayArray# i s of
     s -> (# s, marr #)
 {-# inline newUnlifted# #-}
 
-class Unlifted (a :: *) where
+class Unlifted (a :: Type) where
   type Rep a  :: TYPE 'UnliftedRep
   to#         :: a -> Rep a
   from#       :: Rep a -> a

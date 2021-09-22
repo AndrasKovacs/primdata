@@ -3,28 +3,7 @@ version:             0.1.0.0
 license:             BSD3
 author:              "András Kovács"
 maintainer:          "puttamalac@gmail.com"
-copyright:           "2018-2020 András Kovács"
-
-dependencies:
-- base >= 4.7 && < 5
-
-default-extensions:
-- AllowAmbiguousTypes
-- BangPatterns
-- BlockArguments
-- CPP
-- DataKinds
-- FlexibleInstances
-- GeneralizedNewtypeDeriving
-- KindSignatures
-- MagicHash
-- PolyKinds
-- RankNTypes
-- RoleAnnotations
-- ScopedTypeVariables
-- TypeApplications
-- TypeFamilies
-- UnboxedTuples
+copyright:           "2018-2021 András Kovács"
 
 ghc-options:
   - -Wall
@@ -43,4 +22,5 @@ ghc-options:
 library:
   source-dirs: .
   dependencies:
+    - base >= 4.7 && < 5
     - ghc-prim

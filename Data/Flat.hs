@@ -1,3 +1,5 @@
+{-# language UnboxedTuples, TypeOperators, MagicHash, CPP, RankNTypes, TypeApplications,
+             ScopedTypeVariables, AllowAmbiguousTypes #-}
 
 module Data.Flat (
   Flat(..), size
@@ -8,11 +10,10 @@ A class for types which can be naturally represented as uniform-sized pointer-fr
 values.
 -}
 
-import Data.MachDeps
+import GHC.Exts
 import GHC.Int
-import GHC.Prim
-import GHC.Types
 import GHC.Word
+import Data.MachDeps
 
 class Flat a where
 

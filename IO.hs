@@ -1,9 +1,9 @@
+{-# language UnboxedTuples, TypeOperators, MagicHash #-}
 
 module IO (IO(..), runIO, unIO) where
 
 import GHC.Types
-import GHC.Prim
-import GHC.Magic
+import GHC.Exts
 
 runIO :: IO a -> a
 runIO (IO f) = runRW# (\s -> case f s of (# _, a #) -> a)

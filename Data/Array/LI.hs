@@ -1,11 +1,12 @@
+{-# language
+  UnboxedTuples, TypeOperators, MagicHash, RankNTypes,
+  TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
+  RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
 
 module Data.Array.LI where
 
-import GHC.Prim
-import GHC.Types
-import GHC.Magic
+import GHC.Exts
 import Data.Foldable
-
 import Data.Unlifted
 import Data.Array.UndefElem
 

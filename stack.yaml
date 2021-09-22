@@ -1,5 +1,5 @@
 
-resolver: lts-16.31
+resolver: nightly-2021-09-18
 
 packages:
   - .
