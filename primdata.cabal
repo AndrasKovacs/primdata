@@ -30,6 +30,7 @@ library
       Data.Ref.L
       Data.Ref.U
       Data.Ref.UU
+      Data.Ref.UUU
       Data.Unlifted
       IO
   other-modules:
