@@ -26,6 +26,7 @@ library
       Data.Flat
       Data.MachDeps
       Data.Ref.F
+      Data.Ref.FF
       Data.Ref.L
       Data.Ref.U
       Data.Ref.UU
