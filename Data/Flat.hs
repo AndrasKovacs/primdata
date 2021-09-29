@@ -106,3 +106,6 @@ derivePrim(Int32, I32#, sIZEOF_INT32,
 derivePrim(Int64, I64#, sIZEOF_INT64,
            indexInt64Array#, readInt64Array#, writeInt64Array#,
            indexInt64OffAddr#, readInt64OffAddr#, writeInt64OffAddr#)
+derivePrim((Ptr a), Ptr, sIZEOF_PTR,
+           indexAddrArray#, readAddrArray#, writeAddrArray#,
+           indexAddrOffAddr#, readAddrOffAddr#, writeAddrOffAddr#)
