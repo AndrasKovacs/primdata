@@ -31,7 +31,7 @@ defaultRef =
 new :: forall a b. (Flat a, Flat b) => a -> b -> IO (Ref a b)
 new a b = IO \s -> case newByteArray# (F.size# @a proxy# +# F.size# @b proxy#) s of
   (# s, arr #) -> case F.writeByteArray# @a arr 0# a s of
-    s -> case F.writeByteArray# @b arr (F.size# @a proxy#) b s of
+    s -> case F.writeWord8ArrayAs# @b arr (F.size# @a proxy#) b s of
       s -> (# s, Ref arr #)
 {-# inline new #-}
 
@@ -51,16 +51,16 @@ modifyFst (Ref r) f = IO (\s -> case F.readByteArray# @a r 0# s of
 {-# inline modifyFst #-}
 
 writeSnd :: forall a b. (Flat a, Flat b) => Ref a b -> b -> IO ()
-writeSnd (Ref r) b = IO (\s -> case F.writeByteArray# @b r (F.size# @a proxy#) b s of
+writeSnd (Ref r) b = IO (\s -> case F.writeWord8ArrayAs# @b r (F.size# @a proxy#) b s of
   s -> (# s , () #))
 {-# inline writeSnd #-}
 
 readSnd :: forall a b. (Flat a, Flat b) => Ref a b -> IO b
-readSnd (Ref r) = IO (F.readByteArray# @b r (F.size# @a proxy#))
+readSnd (Ref r) = IO (F.readWord8ArrayAs# @b r (F.size# @a proxy#))
 {-# inline readSnd #-}
 
 modifySnd :: forall a b. (Flat a, Flat b) => Ref a b -> (b -> b) -> IO ()
-modifySnd (Ref r) f = IO (\s -> case F.readByteArray# @b r (F.size# @a proxy#) s of
-  (# s, b #) -> case F.writeByteArray# @b r (F.size# @a proxy#) (f b) s of
+modifySnd (Ref r) f = IO (\s -> case F.readWord8ArrayAs# @b r (F.size# @a proxy#) s of
+  (# s, b #) -> case F.writeWord8ArrayAs# @b r (F.size# @a proxy#) (f b) s of
     s -> (# s, () #))
 {-# inline modifySnd #-}

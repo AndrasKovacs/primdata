@@ -29,6 +29,7 @@ defaultRef =
   Ref (runRW# (\s -> case newByteArray# (F.size# @a proxy#) s of
     (# s, arr #) -> arr))
 {-# specialize noinline defaultRef :: Ref Int #-}
+{-# specialize noinline defaultRef :: Ref Word #-}
 {-# specialize noinline defaultRef :: Ref Char #-}
 {-# specialize noinline defaultRef :: Ref Double #-}
 
