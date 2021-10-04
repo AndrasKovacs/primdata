@@ -7,7 +7,6 @@ module Data.Array.UI where
 
 import GHC.Exts
 import Data.Unlifted
-import IO
 
 type role Array representational
 data Array a = Array ArrayArray#
@@ -24,10 +23,6 @@ instance Unlifted (Array a) where
 instance (Unlifted a, Show a) => Show (Array a) where
   show = show . Data.Array.UI.foldr (:) []
   {-# inline show #-}
-
-instance RunIO (Array a) where
-  runIO (IO f) = Array (runRW# \s -> case f s of (# _, Array a #) -> a )
-  {-# inline runIO #-}
 
 new :: forall a. Unlifted a => Int -> a -> Array a
 new (I# i) a = case to# a of

@@ -24,10 +24,6 @@ instance (Flat a, Flat b, Flat c) => Unlifted (Ref a b c) where
   defaultElem = defaultRef
   {-# inline defaultElem #-}
 
-instance RunIO (Ref a b c) where
-  runIO (IO f) = Ref (runRW# \s -> case f s of (# _, Ref a #) -> a )
-  {-# inline runIO #-}
-
 defaultRef :: forall a b c. (Flat a, Flat b, Flat c) => Ref a b c
 defaultRef =
   Ref (runRW# (\s ->

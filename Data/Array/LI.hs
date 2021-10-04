@@ -9,7 +9,6 @@ import GHC.Exts
 import Data.Foldable
 import Data.Unlifted
 import Data.Array.UndefElem
-import IO
 
 type role Array representational
 data Array a = Array (Array# a)
@@ -38,10 +37,6 @@ instance Unlifted (Array a) where
   {-# inline from# #-}
   defaultElem = empty
   {-# inline defaultElem #-}
-
-instance RunIO (Array a) where
-  runIO (IO f) = Array (runRW# \s -> case f s of (# _, Array a #) -> a )
-  {-# inline runIO #-}
 
 instance Show a => Show (Array a) where
   show = show . Data.Array.LI.foldr (:) []

@@ -23,10 +23,6 @@ instance Unlifted (Ref a) where
   defaultElem = runIO (new undefElem)
   {-# noinline defaultElem #-}
 
-instance RunIO (Ref a) where
-  runIO (IO f) = Ref (runRW# \s -> case f s of (# _, Ref a #) -> a )
-  {-# inline runIO #-}
-
 new :: a -> IO (Ref a)
 new a = IO (\s -> case newMutVar# a s of
   (# s , r #) -> (# s, Ref r #))

@@ -23,10 +23,6 @@ instance Unlifted (Array a) where
   defaultElem = empty
   {-# inline defaultElem #-}
 
-instance RunIO (Array a) where
-  runIO (IO f) = Array (runRW# \s -> case f s of (# _, Array a #) -> a )
-  {-# inline runIO #-}
-
 new :: forall a. Unlifted a => Int -> a -> IO (Array a)
 new (I# i) a = IO (\s -> case newUnlifted# i (to# a) s of
     (# s, arr #) -> (# s, Array arr #))
