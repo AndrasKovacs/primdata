@@ -8,6 +8,7 @@ module Data.Array.FI where
 import GHC.Exts
 import Data.Flat
 import Data.Unlifted
+import IO
 
 type role Array representational
 data Array a = Array ByteArray#
@@ -24,6 +25,10 @@ instance Unlifted (Array a) where
 instance (Flat a, Show a) => Show (Array a) where
   show = show . Data.Array.FI.foldr (:) []
   {-# inline show #-}
+
+instance RunIO (Array a) where
+  runIO (IO f) = Array (runRW# \s -> case f s of (# _, Array a #) -> a )
+  {-# inline runIO #-}
 
 new# :: forall a. Flat a => Int# -> ByteArray#
 new# n = runRW# \s -> case newByteArray# (n *# Data.Flat.size# @a proxy#) s of

@@ -9,6 +9,7 @@ module Data.Ref.UUU where
 import GHC.Exts
 import Data.Unlifted
 import qualified Data.Array.UM as UM
+import IO
 
 type role Ref representational representational representational
 newtype Ref a b c = Ref (UM.Array a)
@@ -21,6 +22,10 @@ instance (Unlifted a, Unlifted b) => Unlifted (Ref a b c) where
   {-# inline from# #-}
   defaultElem = Ref defaultElem
   {-# inline defaultElem #-}
+
+instance RunIO (Ref a b c) where
+  runIO (IO f) = Ref (runRW# \s -> case f s of (# _, Ref a #) -> a )
+  {-# inline runIO #-}
 
 new :: forall a b c. (Unlifted a, Unlifted b, Unlifted c) => a -> b -> c -> IO (Ref a b c)
 new a b c = do

@@ -24,6 +24,10 @@ instance Flat a => Unlifted (Ref a) where
   defaultElem = defaultRef
   {-# inline defaultElem #-}
 
+instance RunIO (Ref a) where
+  runIO (IO f) = Ref (runRW# \s -> case f s of (# _, Ref a #) -> a )
+  {-# inline runIO #-}
+
 defaultRef :: forall a. Flat a => Ref a
 defaultRef =
   Ref (runRW# (\s -> case newByteArray# (F.size# @a proxy#) s of

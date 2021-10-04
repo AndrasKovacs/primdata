@@ -26,6 +26,10 @@ instance Unlifted (Array a) where
   defaultElem = empty
   {-# inline defaultElem #-}
 
+instance RunIO (Array a) where
+  runIO (IO f) = Array (runRW# \s -> case f s of (# _, Array a #) -> a )
+  {-# inline runIO #-}
+
 new :: forall a. Flat a => Int -> IO (Array a)
 new (I# n) = IO \s -> case newByteArray# (n *# size# @a proxy#) s of
     (# s, marr #) -> (# s, Array marr #)
