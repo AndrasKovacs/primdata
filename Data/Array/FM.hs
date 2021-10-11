@@ -56,28 +56,33 @@ map' :: forall a. Flat a => (a -> a) -> Array a -> IO ()
 map' f (Array arr) = IO \s ->
   let go arr i n s = case i ==# n of
         1# -> (# s, () #)
-        _  -> case readByteArray# arr i s of
+        _  -> case readWord8ArrayAs# arr i s of
           (# s, a #) -> case a of
             !a -> case f a of
-              !a -> case writeByteArray# arr i a s of
-                 s -> go arr (i +# 1#) n s
-  in go arr 0# (quotInt# (sizeofMutableByteArray# arr) (size# @a proxy#)) s
+              !a -> case writeWord8ArrayAs# arr i a s of
+                 s -> go arr (i +# size# @a proxy#) n s
+  in go arr 0# (sizeofMutableByteArray# arr) s
 {-# inline map' #-}
 
 for :: forall a. Flat a => Array a -> (a -> IO ()) -> IO ()
 for (Array arr) f = IO \s ->
   let go arr i n s = case i ==# n of
         1# -> (# s, () #)
-        _  -> case readByteArray# arr i s of
+        _  -> case readWord8ArrayAs# arr i s of
           (# s, a #) -> case a of
             !a -> case f a of
               IO f -> case f s of
-                (# s, _ #) -> go arr (i +# 1#) n s
-  in go arr 0# (quotInt# (sizeofMutableByteArray# arr) (size# @a proxy#)) s
+                (# s, _ #) -> go arr (i +# size# @a proxy#) n s
+  in go arr 0# (sizeofMutableByteArray# arr) s
 {-# inline for #-}
 
 set :: forall a. Flat a => Array a -> a -> IO ()
-set arr a = map' (\_ -> a) arr
+set (Array arr) a = IO \s ->
+  let go arr i n s = case i ==# n of
+        1# -> (# s, () #)
+        _  -> case writeWord8ArrayAs# arr i a s of
+          s -> go arr (i +# size# @a proxy#) n s
+  in go arr 0# (sizeofMutableByteArray# arr) s
 {-# inline set #-}
 
 size :: forall a. Flat a => Array a -> Int
