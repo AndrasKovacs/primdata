@@ -1,5 +1,6 @@
-{-# language UnboxedTuples, TypeOperators, MagicHash, CPP, RankNTypes, TypeApplications,
-             ScopedTypeVariables, AllowAmbiguousTypes, KindSignatures, TypeFamilies #-}
+{-# language
+  UnboxedTuples, TypeOperators, MagicHash, CPP, RankNTypes, TypeApplications,
+  DataKinds, ScopedTypeVariables, AllowAmbiguousTypes, KindSignatures, TypeFamilies #-}
 
 module Data.Unlifted where
 
@@ -15,22 +16,27 @@ module Data.Unlifted where
 import Data.Kind
 import GHC.Exts
 
+#if MIN_VERSION_base(4,16,0)
+#else
+type UnliftedType = TYPE UnliftedRep
+#endif
+
 writeUnlifted# ::
-   forall (a :: TYPE 'UnliftedRep) s. MutableArrayArray# s -> Int# -> a -> State# s -> State# s
+   forall (a :: UnliftedType) s. MutableArrayArray# s -> Int# -> a -> State# s -> State# s
 writeUnlifted# marr i a s = writeArrayArrayArray# marr i (unsafeCoerce# a) s
 {-# inline writeUnlifted# #-}
 
-readUnlifted# :: forall (a :: TYPE 'UnliftedRep) s.
+readUnlifted# :: forall (a :: UnliftedType) s.
          MutableArrayArray# s -> Int# -> State# s -> (# State# s, a #)
 readUnlifted# marr i s = unsafeCoerce# (readArrayArrayArray# marr i s)
 {-# inline readUnlifted# #-}
 
-indexUnlifted# :: forall (a :: TYPE 'UnliftedRep). ArrayArray# -> Int# -> a
+indexUnlifted# :: forall (a :: UnliftedType). ArrayArray# -> Int# -> a
 indexUnlifted# arr i = unsafeCoerce# (indexArrayArrayArray# arr i)
 {-# inline indexUnlifted# #-}
 
 setUnlifted# ::
-  forall (a :: TYPE 'UnliftedRep) s. MutableArrayArray# s -> a -> State# s -> State# s
+  forall (a :: UnliftedType) s. MutableArrayArray# s -> a -> State# s -> State# s
 setUnlifted# marr a s =
   let go :: MutableArrayArray# s -> a -> State# s -> Int# -> Int# -> State# s
       go marr a s l i = case i ==# l of
@@ -39,14 +45,14 @@ setUnlifted# marr a s =
   in go marr a s (sizeofMutableArrayArray# marr) 0#
 {-# inline setUnlifted# #-}
 
-newUnlifted# :: forall (a :: TYPE 'UnliftedRep) s. Int# -> a -> State# s -> (# State# s, MutableArrayArray# s #)
+newUnlifted# :: forall (a :: UnliftedType) s. Int# -> a -> State# s -> (# State# s, MutableArrayArray# s #)
 newUnlifted# i a s = case newArrayArray# i s of
   (# s, marr #) -> case setUnlifted# marr a s of
     s -> (# s, marr #)
 {-# inline newUnlifted# #-}
 
 class Unlifted (a :: Type) where
-  type Rep a  :: TYPE 'UnliftedRep
+  type Rep a  :: UnliftedType
   to#         :: a -> Rep a
   from#       :: Rep a -> a
   defaultElem :: a
