@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           primdata
-version:        0.1.0.0
+version:        0.1.1.0
 author:         András Kovács
 maintainer:     puttamalac@gmail.com
 copyright:      2018-2021 András Kovács

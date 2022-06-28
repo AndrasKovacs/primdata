@@ -26,7 +26,7 @@ instance (Flat a, Show a) => Show (Array a) where
   {-# inline show #-}
 
 new# :: forall a. Flat a => Int# -> ByteArray#
-new# n = runRW# \s -> case newByteArray# (n *# Data.Flat.size# @a proxy#) s of
+new# n = runRW# \s -> case newByteArray# (toByteOffset# @a n) s of
     (# s, marr #) -> case unsafeFreezeByteArray# marr s of
       (# _, arr #) -> arr
 {-# inline new# #-}
@@ -52,7 +52,7 @@ infixl 7 !
 {-# inline (!) #-}
 
 size# :: forall a. Flat a => ByteArray# -> Int#
-size# arr = quotInt# (sizeofByteArray# arr) (Data.Flat.size# @a proxy#)
+size# arr = fromByteOffset# @a (sizeofByteArray# arr)
 {-# inline size# #-}
 
 size :: forall a. Flat a => Array a -> Int
@@ -67,7 +67,7 @@ sizedMap# size f = \arr ->
                 s -> go (i +# 1#) marr size s
             _  -> s
     in runRW# \s ->
-        case newByteArray# (size *# (Data.Flat.size# @a proxy#)) s of
+        case newByteArray# (toByteOffset# @b size) s of
             (# s, marr #) -> case go 0# marr size s of
                 s -> case unsafeFreezeByteArray# marr s of
                   (# _, arr #) -> arr
@@ -88,12 +88,26 @@ foldr f = \z (Array arr) -> go 0# (Data.Array.FI.size# @a arr) z arr where
         _  -> z
 {-# inline foldr #-}
 
+foldr' :: forall a b. Flat a => (a -> b -> b) -> b -> Array a -> b
+foldr' f = \z (Array arr) -> go 0# (Data.Array.FI.size# @a arr) z arr where
+    go i s z arr = case i <# s of
+        1# -> let !a = arr !# i :: a; !b = go (i +# 1#) s z arr in f a b
+        _  -> z
+{-# inline foldr' #-}
+
 rfoldr :: forall a b. Flat a => (a -> b -> b) -> b -> Array a -> b
 rfoldr f = \z (Array arr) -> go (Data.Array.FI.size# @a arr -# 1#) z arr where
     go i z arr = case i >=# 0# of
         1# -> f (arr !# i :: a) (go (i -# 1#) z arr)
         _  -> z
 {-# inline rfoldr #-}
+
+rfoldr' :: forall a b. Flat a => (a -> b -> b) -> b -> Array a -> b
+rfoldr' f = \z (Array arr) -> go (Data.Array.FI.size# @a arr -# 1#) z arr where
+    go i z arr = case i >=# 0# of
+        1# -> let !a = arr !# i :: a; !b = go (i -# 1#) z arr in f a b
+        _  -> z
+{-# inline rfoldr' #-}
 
 foldl' :: forall a b. Flat a => (b -> a -> b) -> b -> Array a -> b
 foldl' f = \z (Array arr) -> go 0# (Data.Array.FI.size# @a arr) z arr  where
@@ -112,7 +126,7 @@ rfoldl' f = \z (Array arr) -> go (Data.Array.FI.size# @a arr -# 1#) z arr where
 fromList :: forall a. Flat a => [a] -> Array a
 fromList xs = case length xs of
   I# len -> Array (runRW# \s ->
-    case newByteArray# (Data.Flat.size# @a proxy# *# len) s of
+    case newByteArray# (toByteOffset# @a len) s of
       (# s, marr #) -> go xs 0# s where
         go (x:xs) i s = case Data.Flat.writeByteArray# marr i x s of
                           s -> go xs (i +# 1#) s

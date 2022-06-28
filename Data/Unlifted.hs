@@ -18,7 +18,7 @@ import GHC.Exts
 
 #if MIN_VERSION_base(4,16,0)
 #else
-type UnliftedType = TYPE UnliftedRep
+type UnliftedType = TYPE 'UnliftedRep
 #endif
 
 writeUnlifted# ::
