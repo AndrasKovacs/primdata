@@ -15,6 +15,10 @@ import qualified Data.Array.SI as SI
 type role Array representational
 data Array a = Array (SmallMutableArray# RealWorld a)
 
+elemType :: Array a -> Proxy# a
+elemType _ = proxy#
+{-# inline elemType #-}
+
 instance Unlifted (Array a) where
   type Rep (Array a) = SmallMutableArray# RealWorld a
   to# (Array arr) = arr

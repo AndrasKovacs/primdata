@@ -11,6 +11,10 @@ import Data.Unlifted
 type role Array representational
 data Array a = Array ArrayArray#
 
+elemType :: Array a -> Proxy# a
+elemType _ = proxy#
+{-# inline elemType #-}
+
 instance Unlifted (Array a) where
   type Rep (Array a) = ArrayArray#
   to# (Array arr) = arr

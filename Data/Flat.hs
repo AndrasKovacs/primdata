@@ -1,7 +1,7 @@
 {-# language UnboxedTuples, TypeOperators, MagicHash, CPP, RankNTypes, TypeApplications,
              ScopedTypeVariables, AllowAmbiguousTypes #-}
 
-module Data.Flat (Flat(..), size) where
+module Data.Flat (Flat(..), size, toByteOffset, fromByteOffset) where
 
 {-|
 A class for types which can be naturally represented as uniform-sized pointer-free
@@ -69,11 +69,19 @@ size :: forall a. Flat a => Int
 size = I# (size# @a proxy#)
 {-# inline size #-}
 
-#define derivePrim(ty, ctr, sz, shift, idx_arr, rd_arr, wr_arr, idx_addr, rd_addr, wr_addr, idx_as, read_as, write_as) \
+toByteOffset :: forall a. Flat a => Int -> Int
+toByteOffset (I# i) = I# (toByteOffset# @a i)
+{-# inline toByteOffset #-}
+
+fromByteOffset :: forall a. Flat a => Int -> Int
+fromByteOffset (I# i) = I# (fromByteOffset# @a i)
+{-# inline fromByteOffset #-}
+
+#define derivePrim(ty, ctr, sz, tobo, frombo, idx_arr, rd_arr, wr_arr, idx_addr, rd_addr, wr_addr, idx_as, read_as, write_as) \
 instance Flat (ty) where {                                 \
   size# _ = sz                                             \
-; toByteOffset# i = uncheckedIShiftL# i shift              \
-; fromByteOffset# i = uncheckedIShiftRA# i shift           \
+; toByteOffset# i = tobo                                   \
+; fromByteOffset# i = frombo                               \
 ; indexByteArray# arr i = ctr (idx_arr arr i)              \
 ; readByteArray#  arr i s = case rd_arr arr i s of         \
                         { (# s1, x #) -> (# s1, ctr x #) } \
@@ -100,55 +108,93 @@ instance Flat (ty) where {                                 \
 ; {-# inline writeWord8ArrayAs# #-}                        \
 }
 
-derivePrim(Int, I#, SIZEOF_HSINT#, WORDSHIFT#,
+derivePrim(Int, I#, SIZEOF_HSINT#,
+           uncheckedIShiftL# i WORDSHIFT#,
+           uncheckedIShiftRA# i WORDSHIFT#,
            indexIntArray#, readIntArray#, writeIntArray#,
            indexIntOffAddr#, readIntOffAddr#, writeIntOffAddr#,
            indexWord8ArrayAsInt#, readWord8ArrayAsInt#, writeWord8ArrayAsInt#)
-derivePrim(Word, W#, SIZEOF_HSWORD#, WORDSHIFT#,
+
+derivePrim(Word, W#, SIZEOF_HSWORD#,
+           uncheckedIShiftL# i WORDSHIFT#,
+           uncheckedIShiftRA# i WORDSHIFT#,
            indexWordArray#, readWordArray#, writeWordArray#,
            indexWordOffAddr#, readWordOffAddr#, writeWordOffAddr#,
            indexWord8ArrayAsWord#, readWord8ArrayAsWord#, writeWord8ArrayAsWord#)
-derivePrim(Double, D#, SIZEOF_HSDOUBLE#, 3#,
+
+derivePrim(Double, D#, SIZEOF_HSDOUBLE#,
+           uncheckedIShiftL# i 3#,
+           uncheckedIShiftRA# i 3#,
            indexDoubleArray#, readDoubleArray#, writeDoubleArray#,
            indexDoubleOffAddr#, readDoubleOffAddr#, writeDoubleOffAddr#,
            indexWord8ArrayAsDouble#, readWord8ArrayAsDouble#, writeWord8ArrayAsDouble#)
-derivePrim(Char, C#, SIZEOF_HSCHAR#, 2#,
+
+derivePrim(Char, C#, SIZEOF_HSCHAR#,
+           uncheckedIShiftL# i 2#,
+           uncheckedIShiftRA# i 2#,
            indexWideCharArray#, readWideCharArray#, writeWideCharArray#,
            indexWideCharOffAddr#, readWideCharOffAddr#, writeWideCharOffAddr#,
            indexWord8ArrayAsWideChar#, readWord8ArrayAsWideChar#, writeWord8ArrayAsWideChar#)
-derivePrim(Word8, W8#, SIZEOF_WORD8#, 0#,
+
+derivePrim(Word8, W8#, SIZEOF_WORD8#,
+           i,
+           i,
            indexWord8Array#, readWord8Array#, writeWord8Array#,
            indexWord8OffAddr#, readWord8OffAddr#, writeWord8OffAddr#,
            indexWord8Array#, readWord8Array#, writeWord8Array#)
-derivePrim(Word16, W16#, SIZEOF_WORD16#, 1#,
+
+derivePrim(Word16, W16#, SIZEOF_WORD16#,
+           uncheckedIShiftL# i 1#,
+           uncheckedIShiftRA# i 1#,
            indexWord16Array#, readWord16Array#, writeWord16Array#,
            indexWord16OffAddr#, readWord16OffAddr#, writeWord16OffAddr#,
            indexWord8ArrayAsWord16#, readWord8ArrayAsWord16#, writeWord8ArrayAsWord16#)
-derivePrim(Word32, W32#, SIZEOF_WORD32#, 2#,
+
+derivePrim(Word32, W32#, SIZEOF_WORD32#,
+           uncheckedIShiftL# i 2#,
+           uncheckedIShiftRA# i 2#,
            indexWord32Array#, readWord32Array#, writeWord32Array#,
            indexWord32OffAddr#, readWord32OffAddr#, writeWord32OffAddr#,
            indexWord8ArrayAsWord32#, readWord8ArrayAsWord32#, writeWord8ArrayAsWord32#)
-derivePrim(Word64, W64#, SIZEOF_WORD64#, 3#,
+
+derivePrim(Word64, W64#, SIZEOF_WORD64#,
+           uncheckedIShiftL# i 3#,
+           uncheckedIShiftRA# i 3#,
            indexWord64Array#, readWord64Array#, writeWord64Array#,
            indexWord64OffAddr#, readWord64OffAddr#, writeWord64OffAddr#,
            indexWord8ArrayAsWord64#, readWord8ArrayAsWord64#, writeWord8ArrayAsWord64#)
-derivePrim(Int8, I8#, SIZEOF_INT8#, 0#,
+
+derivePrim(Int8, I8#, SIZEOF_INT8#,
+           i,
+           i,
            indexInt8Array#, readInt8Array#, writeInt8Array#,
            indexInt8OffAddr#, readInt8OffAddr#, writeInt8OffAddr#,
            indexInt8Array#, readInt8Array#, writeInt8Array#)
-derivePrim(Int16, I16#, SIZEOF_INT16#, 1#,
+
+derivePrim(Int16, I16#, SIZEOF_INT16#,
+           uncheckedIShiftL# i 1#,
+           uncheckedIShiftRA# i 1#,
            indexInt16Array#, readInt16Array#, writeInt16Array#,
            indexInt16OffAddr#, readInt16OffAddr#, writeInt16OffAddr#,
            indexWord8ArrayAsInt16#, readWord8ArrayAsInt16#, writeWord8ArrayAsInt16#)
-derivePrim(Int32, I32#, SIZEOF_INT32#, 2#,
+
+derivePrim(Int32, I32#, SIZEOF_INT32#,
+           uncheckedIShiftL# i 2#,
+           uncheckedIShiftRA# i 2#,
            indexInt32Array#, readInt32Array#, writeInt32Array#,
            indexInt32OffAddr#, readInt32OffAddr#, writeInt32OffAddr#,
            indexWord8ArrayAsInt32#, readWord8ArrayAsInt32#, writeWord8ArrayAsInt32#)
-derivePrim(Int64, I64#, SIZEOF_INT64#, 3#,
+
+derivePrim(Int64, I64#, SIZEOF_INT64#,
+           uncheckedIShiftL# i 3#,
+           uncheckedIShiftRA# i 3#,
            indexInt64Array#, readInt64Array#, writeInt64Array#,
            indexInt64OffAddr#, readInt64OffAddr#, writeInt64OffAddr#,
            indexWord8ArrayAsInt64#, readWord8ArrayAsInt64#, writeWord8ArrayAsInt64#)
-derivePrim((Ptr a), Ptr, SIZEOF_HSPTR#, WORDSHIFT#,
+
+derivePrim((Ptr a), Ptr, SIZEOF_HSPTR#,
+           uncheckedIShiftL# i WORDSHIFT#,
+           uncheckedIShiftRA# i WORDSHIFT#,
            indexAddrArray#, readAddrArray#, writeAddrArray#,
            indexAddrOffAddr#, readAddrOffAddr#, writeAddrOffAddr#,
            indexWord8ArrayAsAddr#, readWord8ArrayAsAddr#, writeWord8ArrayAsAddr#)

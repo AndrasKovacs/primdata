@@ -12,6 +12,10 @@ import Data.Unlifted
 type role Array representational
 data Array a = Array ByteArray#
 
+elemType :: Array a -> Proxy# a
+elemType _ = proxy#
+{-# inline elemType #-}
+
 instance Unlifted (Array a) where
   type Rep (Array a) = ByteArray#
   to# (Array arr) = arr
@@ -51,6 +55,10 @@ infixl 7 !
 (!) (Array arr) (I# i) = indexByteArray# @a arr i
 {-# inline (!) #-}
 
+indexByBytes :: forall a. Flat a => Array a -> Int -> a
+indexByBytes (Array arr) (I# i) = indexWord8ArrayAs# @a arr i
+{-# inline indexByBytes #-}
+
 size# :: forall a. Flat a => ByteArray# -> Int#
 size# arr = fromByteOffset# @a (sizeofByteArray# arr)
 {-# inline size# #-}
@@ -58,6 +66,9 @@ size# arr = fromByteOffset# @a (sizeofByteArray# arr)
 size :: forall a. Flat a => Array a -> Int
 size (Array arr) = I# (Data.Array.FI.size# @a arr)
 {-# inline size #-}
+
+sizeInBytes :: forall a. Flat a => Array a -> Int
+sizeInBytes (Array arr) = I# (sizeofByteArray# arr)
 
 sizedMap# :: forall a b. (Flat a, Flat b) => Int# -> (a -> b) -> ByteArray# -> ByteArray#
 sizedMap# size f = \arr ->

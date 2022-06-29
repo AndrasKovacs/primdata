@@ -13,6 +13,10 @@ import Data.Array.UndefElem
 type role Array representational
 data Array a = Array (Array# a)
 
+elemType :: Array a -> Proxy# a
+elemType _ = proxy#
+{-# inline elemType #-}
+
 instance Functor Array where
   fmap = Data.Array.LI.map
   {-# inline fmap #-}
