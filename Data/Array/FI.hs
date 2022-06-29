@@ -30,7 +30,7 @@ instance (Flat a, Show a) => Show (Array a) where
   {-# inline show #-}
 
 new# :: forall a. Flat a => Int# -> ByteArray#
-new# n = runRW# \s -> case newByteArray# (toByteOffset# @a n) s of
+new# n = runRW# \s -> case newByteArray# (toByteOffset# @a proxy# n) s of
     (# s, marr #) -> case unsafeFreezeByteArray# marr s of
       (# _, arr #) -> arr
 {-# inline new# #-}
@@ -60,7 +60,7 @@ indexByBytes (Array arr) (I# i) = indexWord8ArrayAs# @a arr i
 {-# inline indexByBytes #-}
 
 size# :: forall a. Flat a => ByteArray# -> Int#
-size# arr = fromByteOffset# @a (sizeofByteArray# arr)
+size# arr = fromByteOffset# @a proxy# (sizeofByteArray# arr)
 {-# inline size# #-}
 
 size :: forall a. Flat a => Array a -> Int
@@ -78,7 +78,7 @@ sizedMap# size f = \arr ->
                 s -> go (i +# 1#) marr size s
             _  -> s
     in runRW# \s ->
-        case newByteArray# (toByteOffset# @b size) s of
+        case newByteArray# (toByteOffset# @b proxy# size) s of
             (# s, marr #) -> case go 0# marr size s of
                 s -> case unsafeFreezeByteArray# marr s of
                   (# _, arr #) -> arr
@@ -137,7 +137,7 @@ rfoldl' f = \z (Array arr) -> go (Data.Array.FI.size# @a arr -# 1#) z arr where
 fromList :: forall a. Flat a => [a] -> Array a
 fromList xs = case length xs of
   I# len -> Array (runRW# \s ->
-    case newByteArray# (toByteOffset# @a len) s of
+    case newByteArray# (toByteOffset# @a proxy# len) s of
       (# s, marr #) -> go xs 0# s where
         go (x:xs) i s = case Data.Flat.writeByteArray# marr i x s of
                           s -> go xs (i +# 1#) s

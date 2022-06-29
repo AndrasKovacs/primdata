@@ -31,7 +31,7 @@ instance Unlifted (Array a) where
   {-# inline defaultElem #-}
 
 new :: forall a. Flat a => Int -> IO (Array a)
-new (I# n) = IO \s -> case newByteArray# (toByteOffset# @a n) s of
+new (I# n) = IO \s -> case newByteArray# (toByteOffset# @a proxy# n) s of
     (# s, marr #) -> (# s, Array marr #)
 {-# inline new #-}
 
@@ -90,7 +90,7 @@ set (Array arr) a = IO \s ->
 {-# inline set #-}
 
 size :: forall a. Flat a => Array a -> Int
-size (Array arr) = I# (fromByteOffset# @a (sizeofMutableByteArray# arr))
+size (Array arr) = I# (fromByteOffset# @a proxy# (sizeofMutableByteArray# arr))
 {-# inline size #-}
 
 thaw :: forall a. FI.Array a -> IO (Array a)

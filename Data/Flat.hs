@@ -1,7 +1,15 @@
 {-# language UnboxedTuples, TypeOperators, MagicHash, CPP, RankNTypes, TypeApplications,
              ScopedTypeVariables, AllowAmbiguousTypes #-}
 
-module Data.Flat (Flat(..), size, toByteOffset, fromByteOffset) where
+module Data.Flat (
+    Flat(..)
+  , size
+  , toByteOffset
+  , fromByteOffset
+  , sizeP
+  , toByteOffsetP
+  , fromByteOffsetP
+  ) where
 
 {-|
 A class for types which can be naturally represented as uniform-sized pointer-free
@@ -26,10 +34,10 @@ class Flat a where
 
   -- | Convert an offset in terms of type elements to an offset in terms
   --   of bytes.
-  toByteOffset# :: Int# -> Int#
+  toByteOffset# :: Proxy# a -> Int# -> Int#
 
   -- | Convert a byte offset to an offset in terms of values of the type.
-  fromByteOffset# :: Int# -> Int#
+  fromByteOffset# :: Proxy# a -> Int# -> Int#
 
   -- | Read a value from the array. The offset is in elements of type
   -- @a@ rather than in bytes.
@@ -70,18 +78,30 @@ size = I# (size# @a proxy#)
 {-# inline size #-}
 
 toByteOffset :: forall a. Flat a => Int -> Int
-toByteOffset (I# i) = I# (toByteOffset# @a i)
+toByteOffset (I# i) = I# (toByteOffset# @a proxy# i)
 {-# inline toByteOffset #-}
 
 fromByteOffset :: forall a. Flat a => Int -> Int
-fromByteOffset (I# i) = I# (fromByteOffset# @a i)
+fromByteOffset (I# i) = I# (fromByteOffset# @a proxy# i)
 {-# inline fromByteOffset #-}
+
+sizeP :: forall a. Flat a => Proxy# a -> Int
+sizeP _ = I# (size# @a proxy#)
+{-# inline sizeP #-}
+
+toByteOffsetP :: forall a. Flat a => Proxy# a -> Int -> Int
+toByteOffsetP _ (I# i) = I# (toByteOffset# @a proxy# i)
+{-# inline toByteOffsetP #-}
+
+fromByteOffsetP :: forall a. Flat a => Proxy# a -> Int -> Int
+fromByteOffsetP _ (I# i) = I# (fromByteOffset# @a proxy# i)
+{-# inline fromByteOffsetP #-}
 
 #define derivePrim(ty, ctr, sz, tobo, frombo, idx_arr, rd_arr, wr_arr, idx_addr, rd_addr, wr_addr, idx_as, read_as, write_as) \
 instance Flat (ty) where {                                 \
   size# _ = sz                                             \
-; toByteOffset# i = tobo                                   \
-; fromByteOffset# i = frombo                               \
+; toByteOffset# _ i = tobo                                 \
+; fromByteOffset# _ i = frombo                             \
 ; indexByteArray# arr i = ctr (idx_arr arr i)              \
 ; readByteArray#  arr i s = case rd_arr arr i s of         \
                         { (# s1, x #) -> (# s1, ctr x #) } \
