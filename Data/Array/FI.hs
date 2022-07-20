@@ -3,6 +3,10 @@
   TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
   RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
 
+{-|
+Flat immutable arrays.
+-}
+
 module Data.Array.FI where
 
 import GHC.Exts

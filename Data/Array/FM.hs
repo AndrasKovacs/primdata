@@ -3,6 +3,10 @@
   TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
   RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
 
+{-|
+Flat mutable arrays.
+-}
+
 module Data.Array.FM where
 
 import GHC.Exts

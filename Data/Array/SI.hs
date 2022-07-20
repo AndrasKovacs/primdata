@@ -3,6 +3,8 @@
   TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
   RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
 
+{-| Immutable (lifted) small arrays. -}
+
 module Data.Array.SI where
 
 import GHC.Exts

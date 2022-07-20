@@ -3,6 +3,8 @@
   TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
   RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
 
+{-| Mutable unlifted arrays. -}
+
 module Data.Array.UM where
 
 import GHC.Exts
