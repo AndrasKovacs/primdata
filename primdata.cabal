@@ -1,11 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
 name:           primdata
-version:        0.1.1.0
+version:        0.1.2.0
 author:         András Kovács
 maintainer:     puttamalac@gmail.com
 copyright:      2018-2021 András Kovács
@@ -38,7 +38,7 @@ library
       Paths_primdata
   hs-source-dirs:
       ./
-  ghc-options: -Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-matches -Wno-partial-type-signatures -O2 -fllvm
+  ghc-options: -Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-matches -Wno-partial-type-signatures -O2
   build-depends:
       base >=4.7 && <5
     , ghc-prim
