@@ -29,6 +29,12 @@ instance Unlifted (Array a) where
   defaultElem = empty
   {-# inline defaultElem #-}
 
+instance Semigroup (Array a) where
+  (<>) = append; {-# inline (<>) #-}
+
+instance Monoid (Array a) where
+  mempty = empty; {-# inline mempty #-}
+
 instance (Flat a, Show a) => Show (Array a) where
   show = show . Data.Array.FI.foldr (:) []
   {-# inline show #-}
@@ -48,6 +54,27 @@ empty = Array (runRW# \s -> case newByteArray# 0# s of
     (# s, marr #) -> case unsafeFreezeByteArray# marr s of
       (# _, arr #) -> arr)
 {-# noinline empty #-}
+
+cons :: forall a. Flat a => a -> Array a -> Array a
+cons a (Array as) = runRW# \s ->
+  let as_size = sizeofByteArray# as
+      a_size  = Data.Flat.size# @a proxy#
+  in case newByteArray# (as_size +# a_size) s of
+    (# s, marr #) -> case writeByteArray# marr 0# a s of
+      s -> case copyByteArray# as 0# marr a_size as_size s of
+        s -> case unsafeFreezeByteArray# marr s of
+          (# _, arr #) -> Array arr
+{-# inline cons #-}
+
+append :: Array a -> Array a -> Array a
+append (Array a) (Array a') = runRW# \s ->
+    let size_a  = sizeofByteArray# a in
+    let size_a' = sizeofByteArray# a' in
+    case newByteArray# (size_a +# sizeofByteArray# a') s of
+      (# s, dst #) -> case copyByteArray# a 0# dst 0# size_a s of
+        s -> case copyByteArray# a' 0# dst size_a size_a' s of
+          s -> case unsafeFreezeByteArray# dst s of
+            (# _, arr #) -> Array arr
 
 infixl 7 !#
 (!#) :: forall a. Flat a => ByteArray# -> Int# -> a
