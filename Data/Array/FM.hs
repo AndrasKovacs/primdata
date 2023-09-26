@@ -44,6 +44,15 @@ empty = Array (runRW# \s -> case newByteArray# 0# s of
   (# s, arr #) -> arr)
 {-# noinline empty #-}
 
+copy :: forall a. Flat a => Array a -> Int -> Array a -> Int -> Int -> IO ()
+copy (Array arr) (I# i) (Array arr') (I# i') (I# len) = IO \s ->
+  case copyMutableByteArray#
+          arr  (toByteOffset# @a proxy# i)
+          arr' (toByteOffset# @a proxy# i')
+               (toByteOffset# @a proxy# len) s of
+    s -> (# s, () #)
+{-# inline copy #-}
+
 read :: forall a. Flat a => Array a -> Int -> IO a
 read (Array arr) (I# i) = IO (readByteArray# arr i)
 {-# inline read #-}
