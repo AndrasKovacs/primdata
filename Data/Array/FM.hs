@@ -1,5 +1,5 @@
 {-# language
-  UnboxedTuples, TypeOperators, MagicHash, RankNTypes,
+  UnboxedTuples, TypeOperators, MagicHash, RankNTypes, PolyKinds,
   TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
   RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
 
@@ -49,7 +49,7 @@ isPinned :: Array a -> Bool
 isPinned (Array arr) = isTrue# (isMutableByteArrayPinned# arr)
 {-# inline isPinned #-}
 
-contents :: Array a -> (Addr# -> b) -> b
+contents :: forall r a (b :: TYPE r). Array a -> (Addr# -> b) -> b
 contents (Array arr) cont = case isMutableByteArrayPinned# arr of
   1# -> runRW# \s -> keepAlive# arr s \s -> cont (mutableByteArrayContents# arr)
   _  -> unpinnedContents
