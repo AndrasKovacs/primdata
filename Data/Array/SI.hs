@@ -10,7 +10,7 @@ module Data.Array.SI where
 import GHC.Exts
 import Data.Foldable
 import Data.Unlifted
-import Data.Array.UndefElem
+import Data.Internal.Errors
 
 type role Array representational
 data Array a = Array (SmallArray# a)

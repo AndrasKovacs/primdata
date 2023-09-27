@@ -17,6 +17,7 @@ import IO
 
 import qualified Data.Array.FI as FI
 import Data.Unlifted
+import Data.Internal.Errors
 
 type role Array representational
 data Array (a :: Type) = Array (MutableByteArray# RealWorld)
@@ -38,6 +39,21 @@ new :: forall a. Flat a => Int -> IO (Array a)
 new (I# n) = IO \s -> case newByteArray# (toByteOffset# @a proxy# n) s of
     (# s, marr #) -> (# s, Array marr #)
 {-# inline new #-}
+
+pinnedNew :: forall a. Flat a => Int -> IO (Array a)
+pinnedNew (I# n) = IO \s -> case newPinnedByteArray# (toByteOffset# @a proxy# n) s of
+    (# s, marr #) -> (# s, Array marr #)
+{-# inline pinnedNew #-}
+
+isPinned :: Array a -> Bool
+isPinned (Array arr) = isTrue# (isMutableByteArrayPinned# arr)
+{-# inline isPinned #-}
+
+contents :: Array a -> (Addr# -> b) -> b
+contents (Array arr) cont = case isMutableByteArrayPinned# arr of
+  1# -> runRW# \s -> keepAlive# arr s \s -> cont (mutableByteArrayContents# arr)
+  _  -> unpinnedContents
+{-# inline contents #-}
 
 empty :: Array a
 empty = Array (runRW# \s -> case newByteArray# 0# s of

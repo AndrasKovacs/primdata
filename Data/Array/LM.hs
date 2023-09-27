@@ -12,7 +12,7 @@ import GHC.Exts
 import IO
 import Data.Unlifted
 import qualified Data.Array.LI as LI
-import Data.Array.UndefElem
+import Data.Internal.Errors
 
 type role Array representational
 data Array a = Array (MutableArray# RealWorld a)

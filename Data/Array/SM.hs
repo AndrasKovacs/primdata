@@ -11,7 +11,7 @@ import GHC.Exts
 
 import IO
 import Data.Unlifted
-import Data.Array.UndefElem
+import Data.Internal.Errors
 import qualified Data.Array.SI as SI
 
 type role Array representational

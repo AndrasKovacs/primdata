@@ -9,7 +9,7 @@ import GHC.Exts
 
 import Data.Unlifted
 import IO
-import Data.Array.UndefElem
+import Data.Internal.Errors
 
 type role Ref representational
 data Ref a = Ref (MutVar# RealWorld a)
