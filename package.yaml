@@ -1,9 +1,9 @@
 name:                primdata
-version:             0.1.2.1
+version:             0.1.2.2
 license:             BSD3
 author:              "András Kovács"
 maintainer:          "puttamalac@gmail.com"
-copyright:           "2018-2021 András Kovács"
+copyright:           "2018-2025 András Kovács"
 
 ghc-options:
   - -Wall

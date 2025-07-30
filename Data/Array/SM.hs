@@ -2,6 +2,7 @@
   UnboxedTuples, TypeOperators, MagicHash, RankNTypes,
   TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
   RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
+{-# options_ghc -Wno-deprecations #-}
 
 {-| Mutable (lifted) small arrays. -}
 

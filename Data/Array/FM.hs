@@ -2,6 +2,7 @@
   UnboxedTuples, TypeOperators, MagicHash, RankNTypes, PolyKinds,
   TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
   RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
+{-# options_ghc -Wno-deprecations #-}
 
 {-|
 Flat mutable arrays.
@@ -17,7 +18,6 @@ import IO
 
 import qualified Data.Array.FI as FI
 import Data.Unlifted
-import Data.Internal.Errors
 
 type role Array representational
 data Array (a :: Type) = Array (MutableByteArray# RealWorld)
@@ -49,11 +49,11 @@ isPinned :: Array a -> Bool
 isPinned (Array arr) = isTrue# (isMutableByteArrayPinned# arr)
 {-# inline isPinned #-}
 
-contents :: forall r a (b :: TYPE r). Array a -> (Addr# -> b) -> b
-contents (Array arr) cont = case isMutableByteArrayPinned# arr of
-  1# -> runRW# \s -> keepAlive# arr s \s -> cont (mutableByteArrayContents# arr)
-  _  -> unpinnedContents
-{-# inline contents #-}
+-- contents :: forall r a (b :: TYPE r). Array a -> (Addr# -> b) -> b
+-- contents (Array arr) cont = case isMutableByteArrayPinned# arr of
+--   1# -> runRW# \s -> keepAlive# arr s \s -> cont (mutableByteArrayContents# arr)
+--   _  -> unpinnedContents
+-- {-# inline contents #-}
 
 empty :: Array a
 empty = Array (runRW# \s -> case newByteArray# 0# s of
