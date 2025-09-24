@@ -1,9 +1,12 @@
 name:                primdata
-version:             0.1.2.2
-license:             BSD3
+version:             0.1.2.3
+license:             MIT
+synopsis:            Minimum-overhead primitive datatypes
 author:              "András Kovács"
 maintainer:          "puttamalac@gmail.com"
 copyright:           "2018-2025 András Kovács"
+license-file:        LICENSE.txt
+category:            primitive
 
 ghc-options:
   - -Wall
@@ -23,4 +26,4 @@ library:
   source-dirs: .
   dependencies:
     - base >= 4.7 && < 5
-    - ghc-prim
+    - ghc-prim < 0.14

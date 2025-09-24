@@ -5,11 +5,14 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           primdata
-version:        0.1.2.2
+version:        0.1.2.3
+synopsis:       Minimum-overhead primitive datatypes
+category:       primitive
 author:         András Kovács
 maintainer:     puttamalac@gmail.com
 copyright:      2018-2025 András Kovács
-license:        BSD3
+license:        MIT
+license-file:   LICENSE.txt
 build-type:     Simple
 
 library
@@ -41,5 +44,5 @@ library
   ghc-options: -Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-matches -Wno-partial-type-signatures -O2
   build-depends:
       base >=4.7 && <5
-    , ghc-prim
+    , ghc-prim <0.14
   default-language: Haskell2010

@@ -84,6 +84,17 @@ for (Array arr) f = IO \s ->
   in go arr 0# (sizeofSmallMutableArray# arr) s
 {-# inline for #-}
 
+forIx :: forall a. Array a -> (Int -> a -> IO ()) -> IO ()
+forIx (Array arr) f = IO \s ->
+  let go arr i n s = case i ==# n of
+        1# -> (# s, () #)
+        _  -> case readSmallArray# arr i s of
+          (# s, a #) -> case f (I# i) a of
+            IO f -> case f s of
+              (# s, _ #) -> go arr (i +# 1#) n s
+  in go arr 0# (sizeofSmallMutableArray# arr) s
+{-# inline forIx #-}
+
 set :: forall a. Array a -> a -> IO ()
 set arr a = map' (\_ -> a) arr
 {-# inline set #-}

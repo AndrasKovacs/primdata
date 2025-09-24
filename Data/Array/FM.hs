@@ -49,12 +49,6 @@ isPinned :: Array a -> Bool
 isPinned (Array arr) = isTrue# (isMutableByteArrayPinned# arr)
 {-# inline isPinned #-}
 
--- contents :: forall r a (b :: TYPE r). Array a -> (Addr# -> b) -> b
--- contents (Array arr) cont = case isMutableByteArrayPinned# arr of
---   1# -> runRW# \s -> keepAlive# arr s \s -> cont (mutableByteArrayContents# arr)
---   _  -> unpinnedContents
--- {-# inline contents #-}
-
 empty :: Array a
 empty = Array (runRW# \s -> case newByteArray# 0# s of
   (# s, arr #) -> arr)
@@ -109,6 +103,18 @@ for (Array arr) f = IO \s ->
   in go arr 0# (sizeofMutableByteArray# arr) s
 {-# inline for #-}
 
+forIx :: forall a. Flat a => Array a -> (Int -> a -> IO ()) -> IO ()
+forIx (Array arr) f = IO \s ->
+  let go arr i n !ix s = case i ==# n of
+        1# -> (# s, () #)
+        _  -> case readWord8ArrayAs# arr i s of
+          (# s, a #) -> case a of
+            !a -> case f ix a of
+              IO f -> case f s of
+                (# s, _ #) -> go arr (i +# size# @a proxy#) n (ix + 1) s
+  in go arr 0# (sizeofMutableByteArray# arr) 0 s
+{-# inline forIx #-}
+
 set :: forall a. Flat a => Array a -> a -> IO ()
 set (Array arr) a = IO \s ->
   let go arr i n s = case i ==# n of
@@ -122,6 +128,15 @@ size :: forall a. Flat a => Array a -> Int
 size (Array arr) = I# (fromByteOffset# @a proxy# (sizeofMutableByteArray# arr))
 {-# inline size #-}
 
+thawSlice :: forall a. Flat a => FI.Array a -> Int -> Int -> IO (Array a)
+thawSlice (FI.Array arr) (I# start) (I# len) =
+  let len'   = toByteOffset# (proxy# :: Proxy# a) len
+      start' = toByteOffset# (proxy# :: Proxy# a) start
+  in IO \s -> case newByteArray# len' s of
+       (# s, marr #) -> case copyByteArray# arr start' marr 0# len' s of
+         s -> (# s, Array marr #)
+{-# inline thawSlice #-}
+
 thaw :: forall a. FI.Array a -> IO (Array a)
 thaw (FI.Array arr) =
   let n = sizeofByteArray# arr
@@ -130,7 +145,36 @@ thaw (FI.Array arr) =
          s -> (# s, Array marr #)
 {-# inline thaw #-}
 
+copySlice :: forall a. Flat a => Array a -> Int -> Array a -> Int -> Int -> IO ()
+copySlice (Array src) (I# i) (Array dst) (I# j) (I# len) = IO \s ->
+  let i'   = toByteOffset# (proxy# :: Proxy# a) i
+      j'   = toByteOffset# (proxy# :: Proxy# a) j
+      len' = toByteOffset# (proxy# :: Proxy# a) len
+  in case copyMutableByteArray# src i' dst j' len' s of
+    s -> (# s, () #)
+{-# inline copySlice #-}
+
+sizedThaw :: forall a. Flat a => Int -> FI.Array a -> IO (Array a)
+sizedThaw size arr = thawSlice arr 0 size
+{-# inline sizedThaw #-}
+
 unsafeFreeze :: Array a -> IO (FI.Array a)
 unsafeFreeze (Array marr) = IO \s -> case unsafeFreezeByteArray# marr s of
   (# s, arr #) -> (# s, FI.Array arr #)
 {-# inline unsafeFreeze #-}
+
+freezeSlice :: forall a. Flat a => Array a -> Int -> Int -> IO (FI.Array a)
+freezeSlice src start len = do
+  dst <- new @a len
+  copySlice @a src start dst 0 len
+  unsafeFreeze dst
+{-# inline freezeSlice #-}
+
+freeze :: Array a -> IO (FI.Array a)
+freeze (Array arr) = IO \s ->
+  let len = sizeofMutableByteArray# arr
+  in case newByteArray# len s of
+    (# s, marr #) -> case copyMutableByteArrayNonOverlapping# arr 0# marr 0# len s of
+      s -> case unsafeFreezeByteArray# marr s of
+        (# s, arr #) -> (# s, FI.Array arr #)
+{-# inline freeze #-}
