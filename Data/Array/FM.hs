@@ -1,7 +1,7 @@
 {-# language
   UnboxedTuples, TypeOperators, MagicHash, RankNTypes, PolyKinds,
   TypeApplications, ScopedTypeVariables, BangPatterns, BlockArguments,
-  RoleAnnotations, TypeFamilies, AllowAmbiguousTypes #-}
+  RoleAnnotations, TypeFamilies, AllowAmbiguousTypes, CPP #-}
 {-# options_ghc -Wno-deprecations #-}
 
 {-|
@@ -174,7 +174,11 @@ freeze :: Array a -> IO (FI.Array a)
 freeze (Array arr) = IO \s ->
   let len = sizeofMutableByteArray# arr
   in case newByteArray# len s of
+#if __GLASGOW_HASKELL__ >= 908
     (# s, marr #) -> case copyMutableByteArrayNonOverlapping# arr 0# marr 0# len s of
+#else
+    (# s, marr #) -> case copyMutableByteArray# arr 0# marr 0# len s of
+#endif
       s -> case unsafeFreezeByteArray# marr s of
         (# s, arr #) -> (# s, FI.Array arr #)
 {-# inline freeze #-}
