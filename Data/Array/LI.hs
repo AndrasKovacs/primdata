@@ -239,3 +239,10 @@ fromList xs = case length xs of
             go _      _ s = case unsafeFreezeArray# marr s of
                               (# _, arr #) -> arr)
 {-# inline fromList #-}
+
+{-# inline forIx #-}
+forIx :: forall a. Array a -> (Int -> a -> IO ()) -> IO ()
+forIx arr f = go arr 0 (Data.Array.LI.size arr) where
+  go :: Array a -> Int -> Int -> IO ()
+  go arr i len | i == len = pure ()
+  go arr i len = f i (arr ! i) >> go arr (i + 1) len

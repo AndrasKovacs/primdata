@@ -91,3 +91,14 @@ fromList xs = case length xs of
             go _      _ s = case unsafeFreezeArrayArray# marr s of
                               (# _, arr #) -> arr)
 {-# inline fromList #-}
+
+{-# inline forIx #-}
+forIx :: forall a. Unlifted a => Array a -> (Int -> a -> IO ()) -> IO ()
+forIx arr f = go arr 0 (Data.Array.UI.size arr) where
+  go :: Array a -> Int -> Int -> IO ()
+  go arr i len | i == len = pure ()
+  go arr i len = f i (arr ! i) >> go arr (i + 1) len
+
+{-# inline null #-}
+null :: Array a -> Bool
+null (Array arr) = isTrue# (sizeofArrayArray# arr ==# 0#)

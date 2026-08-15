@@ -1,5 +1,5 @@
 name:                primdata
-version:             0.1.2.4
+version:             0.1.2.5
 license:             MIT
 synopsis:            Minimum-overhead primitive datatypes
 author:              "András Kovács"
