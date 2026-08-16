@@ -43,13 +43,22 @@ empty = Array (runRW# \s -> case newArrayArray# 0# s of
            (# s, arr #) -> arr)
 {-# noinline empty #-}
 
+infixl 7 !#
+(!#) :: Unlifted a => Array a -> Int# -> a
+(!#) (Array arr) i = from# (indexUnlifted# arr i)
+{-# inline (!#) #-}
+
 infixl 7 !
 (!) :: Unlifted a => Array a -> Int -> a
 (!) (Array arr) (I# i) = from# (indexUnlifted# arr i)
 {-# inline (!) #-}
 
+size# :: Array a -> Int#
+size# (Array arr) = sizeofArrayArray# arr
+{-# inline size# #-}
+
 size :: Array a -> Int
-size (Array arr) = I# (sizeofArrayArray# arr)
+size arr = I# (size# arr)
 {-# inline size #-}
 
 -- | Create a new array from a slice of the input array.
@@ -73,6 +82,16 @@ foldr f z = \(Array arr) -> go 0# (sizeofArrayArray# arr) z arr where
         _  -> z
 {-# inline foldr #-}
 
+foldr' :: forall a b. Unlifted a => (a -> b -> b) -> b -> Array a -> b
+foldr' f z = \(Array arr) -> go 0# (sizeofArrayArray# arr) z arr where
+    go :: Int# -> Int# -> b -> ArrayArray# -> b
+    go i s z arr = case i <# s of
+        1# -> case indexUnlifted# arr i of
+                a -> case from# a of
+                  !a -> f a $! go (i +# 1#) s z arr
+        _  -> z
+{-# inline foldr' #-}
+
 foldl' :: forall a b. Unlifted a => (b -> a -> b) -> b -> Array a -> b
 foldl' f z = \(Array arr) -> go 0# (sizeofArrayArray# arr) z arr  where
     go i s z arr = case i <# s of
@@ -91,6 +110,10 @@ fromList xs = case length xs of
             go _      _ s = case unsafeFreezeArrayArray# marr s of
                               (# _, arr #) -> arr)
 {-# inline fromList #-}
+
+toList :: forall a. Unlifted a => Array a -> [a]
+toList = foldr' (:) []
+{-# inlinable toList #-}
 
 {-# inline forIx #-}
 forIx :: forall a. Unlifted a => Array a -> (Int -> a -> IO ()) -> IO ()

@@ -137,6 +137,10 @@ foldr' f = \z (Array arr) -> go 0# (Data.Array.FI.size# @a arr) z arr where
         _  -> z
 {-# inline foldr' #-}
 
+toList :: forall a. Flat a => Array a -> [a]
+toList = foldr' (:) []
+{-# inlinable toList #-}
+
 rfoldr :: forall a b. Flat a => (a -> b -> b) -> b -> Array a -> b
 rfoldr f = \z (Array arr) -> go (Data.Array.FI.size# @a arr -# 1#) z arr where
     go i z arr = case i >=# 0# of
